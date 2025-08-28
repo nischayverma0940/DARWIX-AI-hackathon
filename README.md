@@ -52,7 +52,7 @@ verification questions.
 Run the script and provide the URL of a news article when prompted:
 
 ``` bash
-python analysis_tool.py
+python main.py
 ```
 
 Example input:
