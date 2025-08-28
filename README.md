@@ -27,24 +27,24 @@ verification questions.
 
 ## Installation
 
-1.  Clone this repository:
+1. Clone this repository:
+
+   ```bash
+   git clone https://github.com/yourusername/critical-news-analysis.git
+   cd critical-news-analysis
+   ```
+
+2. Create and activate a virtual environment:
 
     ``` bash
-    git clone https://github.com/yourusername/critical-news-analysis.git
-    cd critical-news-analysis
+    python3 -m venv venv
+    source venv/bin/activate
     ```
 
-2.  Install required dependencies:
+3.  Install required dependencies from requirements.txt:
 
     ``` bash
-    pip install requests pandas beautifulsoup4 google-generativeai
-    ```
-
-3.  Set up your **Gemini API key** by replacing the placeholder in the
-    script:
-
-    ``` python
-    GEMINI_API_KEY = "your_api_key_here" (already present in this project)
+    pip install -r requirements.txt
     ```
 
 ## Usage
