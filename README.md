@@ -3,14 +3,14 @@
 This project is an **AI-powered pipeline** that extracts news articles from the web, saves them into a structured dataset, and generates a **Critical Analysis Report** using a large language model (LLM).  
 
 The goal is to encourage **critical thinking** by breaking down an article into:  
-- ✅ Core claims  
-- 🎭 Language & tone  
-- 🚩 Potential red flags  
-- ❓ Verification questions  
+- Core claims  
+- Language & tone  
+- Potential red flags  
+- Verification questions  
 
 ---
 
-## 📂 Project Overview
+## Project Overview
 
 When you run this tool:  
 
@@ -21,15 +21,15 @@ When you run this tool:
 
 ---
 
-## 🛠 Prerequisites
+## Prerequisites
 
 Before you begin, make sure you have:  
 
 - **Python 3.9+** installed (recommended 3.10 or higher).  
 - A machine with:  
-  - ✅ Apple Silicon (M1/M2/M3) → uses **Metal/MPS acceleration**  
-  - ✅ NVIDIA GPU → uses **CUDA**  
-  - ❌ If neither, it runs on **CPU** (slower, but works).  
+  - Apple Silicon (M1/M2/M3) → uses **Metal/MPS acceleration**  
+  - NVIDIA GPU → uses **CUDA**  
+  - If neither, it runs on **CPU** (slower, but works).  
 
 Check your Python version:  
 ```bash
@@ -38,7 +38,7 @@ python3 --version
 
 ---
 
-## 🚀 Step 1: Clone the Repository
+## Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/nischayverma0940/DARWIX-AI-hackathon.git
@@ -49,7 +49,7 @@ This creates a local copy of the project on your system.
 
 ---
 
-## ⚙️ Step 2: Create a Virtual Environment
+## Step 2: Create a Virtual Environment
 
 Creating a **virtual environment** ensures dependencies are isolated from your system Python.  
 
@@ -73,7 +73,7 @@ Once activated, you should see `(venv)` in your terminal prompt.
 
 ---
 
-## 📦 Step 3: Install Dependencies
+## Step 3: Install Dependencies
 
 If a `requirements.txt` is provided:
 ```bash
@@ -99,7 +99,7 @@ You should see at least:
 
 ---
 
-## ▶️ Step 4: Run the Script
+## Step 4: Run the Script
 
 Run the main file:
 ```bash
@@ -115,7 +115,7 @@ python main.py
 
 ---
 
-## 📊 Example Report
+## Example Report
 
 Running the script on an article generates something like this:
 
