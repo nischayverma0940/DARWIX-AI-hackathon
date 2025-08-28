@@ -1,5 +1,4 @@
 requests
-beautifulsoup4
 pandas
-torch
-transformers
+beautifulsoup4
+google-generativeai

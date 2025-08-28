@@ -1,100 +1,89 @@
-import os
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-import torch
-from transformers import pipeline
+import google.generativeai as genai
 
+GEMINI_API_KEY = "AIzaSyB1mQFvHOjhpV4eigJ2WdJhDzIKAbcbtBE"
+genai.configure(api_key=GEMINI_API_KEY)
 
-# -----------------------------
-# STEP 1: Extract article text
-# -----------------------------
-def fetch_article_bs4(url: str) -> str:
-    """Fetch article text using BeautifulSoup"""
-    try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+def fetch_article(url: str) -> str:
+    resp = requests.get(url, timeout=10)
+    soup = BeautifulSoup(resp.text, "html.parser")
+    article_text = " ".join(p.get_text(strip=True) for p in soup.find_all("p"))
+    return article_text.strip()
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        article_tags = soup.find_all(['article', 'p'])
-        text = " ".join(tag.get_text(strip=True) for tag in article_tags)
-        return text.strip()
-    except Exception as e:
-        print(f"[ERROR] Could not fetch with BeautifulSoup: {e}")
-        return ""
+def save_article(text: str, fname="articles.csv"):
+    pd.DataFrame({"text": [text]}).to_csv(fname, index=False)
 
-
-# -----------------------------
-# STEP 2: Save into CSV (overwrite)
-# -----------------------------
-def save_article(text: str, filename: str = "articles.csv") -> str:
-    df = pd.DataFrame({"text": [text]})
-    df.to_csv(filename, index=False)   # overwrite every time
-    return filename
-
-
-# -----------------------------
-# STEP 3: Load model for analysis
-# -----------------------------
-if torch.backends.mps.is_available():
-    device = "mps"
-elif torch.cuda.is_available():
-    device = 0
-else:
-    device = -1
-
-report_generator = pipeline(
-    "text-generation",
-    model="HuggingFaceH4/zephyr-7b-beta",
-    torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-    device=device
-)
-
-
-# -----------------------------
-# STEP 4: Generate Critical Report
-# -----------------------------
-def generate_critical_report(article_text: str, article_title: str = "Untitled Article") -> str:
+def generate_critical_report(article_text: str, title="Untitled") -> str:
     prompt = f"""
-You are a critical thinking assistant.
 Required Output: Your program must produce a single "Critical Analysis Report"
 in Markdown format. This report must contain the following distinct sections:
 
-1. Core Claims: A bulleted list summarizing the 3-5 main factual claims the
-article makes.
-2. Language & Tone Analysis: A brief analysis and classification of the article's
-language (e.g., "Appears neutral and factual," "Uses emotionally charged and
-persuasive language," "Reads as a strong opinion piece").
-3. Potential Red Flags: A bulleted list identifying any detected signs of bias or
-poor reporting, such as loaded terminology, anonymous sources, lack of data,
-or ignoring opposing viewpoints.
-4. Verification Questions: 3-4 insightful, specific questions a reader should ask
-to independently verify the article's content.
+1. Core Claims: A bulleted list summarizing the 3–5 main factual claims the article makes.
+2. Language & Tone Analysis: A brief analysis and classification of the article's language 
+   (e.g., "Appears neutral and factual," "Uses emotionally charged and persuasive language," 
+   "Reads as a strong opinion piece").
+3. Potential Red Flags: A bulleted list identifying any detected signs of bias or poor reporting, 
+   such as the use of loaded terminology, an over-reliance on anonymous sources, a lack of cited data, 
+   or failing to present opposing viewpoints.
+4. Verification Questions: A list of 3–4 insightful, specific questions a reader should ask 
+   to independently verify the article's content.
+5. Entity Recognition: Identify the key people, organizations, and locations mentioned in the article. 
+   For each entity, suggest what a reader should critically investigate 
+   (e.g., "Check the author's previous work," "Look into the funding of 'The XYZ Institute'").
+6. Counter-Argument Simulation: Provide a short summary of the article from the perspective of a hypothetical 
+   opposing viewpoint. This should starkly highlight potential biases by presenting how the same facts 
+   might be framed differently.
 
-Now analyze the following article:
+Example Output Structure:
+# Critical Analysis Report for: [Article Title]
 
-# Critical Analysis Report for: {article_title}
+### Core Claims
+* Claim 1...
+* Claim 2...
 
-Article: {article_text}
+### Language & Tone Analysis
+The language is highly persuasive and uses emotionally charged words like "disastrous".
+
+### Potential Red Flags
+* Relies on a single anonymous insider.
+* No independent data is cited.
+
+### Verification Questions
+1. Can I find corroboration in other independent outlets?
+2. Who funds the organization publishing this piece?
+
+### Entity Recognition
+* John Doe (politician): Investigate prior policy positions.
+* The XYZ Institute (think tank): Research funding sources.
+* City of Springfield: Check local government reports on this issue.
+
+### Counter-Argument Simulation
+From an opposing viewpoint, the article could be summarized as: 
+"While the government claims to be providing support, critics argue that the response is inadequate 
+and primarily serves political interests rather than genuine relief efforts."
+    
+Now, generate the "Critical Analysis Report" for the following article:
+
+Article Title: {title}  
+Article Text: {article_text}
 """
-    response = report_generator(prompt, max_new_tokens=600, do_sample=True, temperature=0.7)
-    return response[0]["generated_text"]
 
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(prompt)
+    return response.text 
 
-# -----------------------------
-# MAIN
-# -----------------------------
 if __name__ == "__main__":
-    url = "https://indianexpress.com/article/cities/chandigarh/haryana-cm-nayab-singh-saini-offers-support-to-punjab-amid-devastating-flood-10216378/"  # example URL
+    url = input("Enter article URL: ").strip()
+    article_text = fetch_article(url)
 
-    article_text = fetch_article_bs4(url)
     if not article_text:
-        print("❌ Failed to extract article text.")
+        print("Failed to extract article text.")
         exit()
 
-    save_article(article_text)  # save to CSV (overwrite)
+    save_article(article_text)
+    report = generate_critical_report(article_text, title="News Article")
 
-    # Run analysis
-    report = generate_critical_report(article_text, article_title="Haryana CM on Punjab Floods")
+    print("\n--- Critical Analysis Report ---\n")
     print(report)
